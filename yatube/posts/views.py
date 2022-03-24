@@ -1,12 +1,12 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from .forms import PostForm
 from .models import Post, Group, User
 
 
-# Самая главная страница
 def index(request):
+    """Главная страница."""
     post_list = Post.objects.all().order_by('-pub_date')
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -18,6 +18,7 @@ def index(request):
 
 
 def group_posts(request, slug):
+    """Посты в группе."""
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     paginator = Paginator(posts, 10)
@@ -31,6 +32,7 @@ def group_posts(request, slug):
 
 
 def profile(request, username):
+    """Посты пользователя."""
     author = get_object_or_404(User, username=username)
     posts = Post.objects.filter(author=author)
     posts_count = author.posts.count()
@@ -46,6 +48,7 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
+    """Открыть пост."""
     post = get_object_or_404(Post, pk=post_id)
     group = post.group
     author = post.author
@@ -57,7 +60,20 @@ def post_detail(request, post_id):
     }
     return render(request, 'posts/post_detail.html', context)
 
+
 @login_required
 def post_create(request):
+    """Создание нового поста."""
+    form = PostForm(request.POST)
 
-    return HttpResponse('Страница создания поста')
+    if form.is_valid():
+        form.instance.author = request.user
+        form.save()
+        return redirect('posts:profile', username=request.user.username)
+
+    context = {
+        'groups': Group.objects.all(),
+        'form': form,
+    }
+
+    return render(request, 'posts/create_post.html', context)

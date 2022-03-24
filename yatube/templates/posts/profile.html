@@ -17,9 +17,9 @@
         <p>
           {{ post.text }}
         </p>
-        <a href="{% url 'posts:post_detail' post.pk %}">подробная информация </a>
+        <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация</a>
         <br>
-          <a href="{% url 'posts:index' %}">все посты пользователя : {{ post.author.get_full_name }}</a>
+          <a href="{% url 'posts:index' %}">Все посты пользователя: {{ post.author.get_full_name }}</a>
         <br>
         {% if not forloop.last %}<hr>{% endif %}
       {% endfor %}

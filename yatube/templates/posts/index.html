@@ -16,10 +16,10 @@
   <p>
     {{ post.text }}
   </p>
-  <a href="{% url 'posts:post_detail' post.pk %}">подробная информация </a>
+  <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация</a>
   {% if post.group %}
   <br>
-   <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы{{ group.description }}</a>
+   <a href="{% url 'posts:group_list' post.group.slug %}">Все записи группы{{ group.description }}</a>
   <br>
   {% endif %}
   <hr>
