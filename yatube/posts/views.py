@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
 from django.core.paginator import Paginator
-
+from django.contrib.auth.decorators import login_required
 from .models import Post, Group, User
 
 
@@ -55,3 +56,8 @@ def post_detail(request, post_id):
         'posts_count': posts_count,
     }
     return render(request, 'posts/post_detail.html', context)
+
+@login_required
+def post_create(request):
+
+    return HttpResponse('Страница создания поста')
