@@ -1,34 +1,37 @@
 {% extends 'base.html' %}
-{% block title %}Новый пост{% endblock title %}
+
+{% block title %}
+    {{ title }}
+{% endblock title %}
+
 {% block content %}
     <div class="row justify-content-center">
       <div class="col-md-8 p-5">
         <div class="card">
           <div class="card-header">
-            Новый пост
+            {{ title }}
           </div>
           <div class="card-body">
-            <form method="post" action="{% url 'posts:post_create' %}">
+            <form method="post" action="">
               {% csrf_token %}
               <div class="form-group row my-3 p-3">
                 <label for="id_text">
                   Текст поста
                   <span class="required text-danger">*</span>
                 </label>
-                <textarea name="text" cols="40" rows="10" class="form-control" required id="id_text">
-                </textarea>
+                <textarea name="text" cols="40" rows="10" class="form-control" required id="id_text">{% if form.text.initial %}{{ form.text.initial }}{% endif %}</textarea>
                 <small id="id_text-help" class="form-text text-muted">
                   Текст нового поста
                 </small>
               </div>
               <div class="form-group row my-3 p-3">
                 <label for="id_group">
-                  Group
+                  Группа
                 </label>
                 <select name="group" class="form-control" id="id_group">
-                    <option value="" selected>Выберите группу...</option>#}
+                    <option value="{{ group }}" selected>Не выбрана..</option>
                     {% for group in groups %}
-                        <option value="1">{{ group }}</option>
+                        <option value="{{ group.id }}" {% if form.group.initial == group.id %}selected{% endif %}>{{ group }}</option>
                     {% endfor %}
                 </select>
                 <small id="id_group-help" class="form-text text-muted">
@@ -36,9 +39,16 @@
                 </small>
               </div>
               <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">
-                  Добавить
-                </button>
+                    {% if is_edit %}
+                        <button type="submit" class="btn btn-primary" value="{% url 'posts:post_edit' post_id %}">
+                            Обновить
+                        </button>
+                    {% else %}
+                         <button type="submit" class="btn btn-primary" value="{% url 'posts:post_create' %}">
+                            Добавить
+                        </button>
+                    {% endif %}
+
               </div>
             </form>
           </div>

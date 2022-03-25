@@ -64,7 +64,7 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     """Создание нового поста."""
-    form = PostForm(request.POST)
+    form = PostForm(request.POST or None)
 
     if form.is_valid():
         form.instance.author = request.user
@@ -72,8 +72,35 @@ def post_create(request):
         return redirect('posts:profile', username=request.user.username)
 
     context = {
+        'is_edit': False,
+        'title': 'Новый пост',
         'groups': Group.objects.all(),
         'form': form,
     }
 
+    return render(request, 'posts/create_post.html', context)
+
+
+@login_required
+def post_edit(request, post_id):
+    """Редактирование поста."""
+    post = get_object_or_404(Post, id=post_id)
+    # Если текущий пользователь не автор - ничего не делается
+    if post.author != request.user:
+        return redirect('posts:post_detail', post.id)
+
+    form = PostForm(request.POST or None,
+                    instance=post)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('posts:post_detail', post.id)
+
+    context = {
+        'is_edit': True,
+        'title': 'Редактирование поста',
+        'groups': Group.objects.all(),
+        'post_id': post.id,
+        'form': form,
+    }
     return render(request, 'posts/create_post.html', context)
