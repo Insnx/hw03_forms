@@ -9,9 +9,9 @@ User = get_user_model()
 class TaskURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        super().setUpClass() #дополняем функционалом из родителя
-        cls.user_author = User.objects.create_user(username='auth')
-        cls.user_simple = User.objects.create_user(username='left')
+        super().setUpClass()  # дополняем функционалом из родителя
+        cls.user_author = User.objects.create_user(username='author')
+        cls.user_simple = User.objects.create_user(username='simple_user')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -34,7 +34,7 @@ class TaskURLTests(TestCase):
         # Создаем третьего клиента
         self.authorized_client_author = Client()
         # Авторизуем пользователя
-        self.authorized_client.force_login(self.user_author)
+        self.authorized_client_author.force_login(self.user_author)
 
     def test_home_url_exists_at_desired_location(self):
         """Страница / доступна любому пользователю."""
@@ -48,24 +48,24 @@ class TaskURLTests(TestCase):
 
     # Проверяем доступность страниц для авторизованного пользователя
     def test_username_list_url_exists_at_desired_location(self):
-        """Страница /username/auth/ доступна авторизованному пользователю."""
-        response = self.authorized_client.get('/username/auth/')
+        """Страница /username/author/ доступна авторизованному пользователю."""
+        response = self.authorized_client.get('/profile/simple_user/')
         self.assertEqual(response.status_code, HTTPStatus.OK.value)
 
-    def test_post_detail_url_exists_at_desired_location_authorized(self):
+    def test_post_detail_url_exists_at_desired_location_authororized(self):
         """Страница /post/id/ доступна авторизованному
         пользователю."""
-        response = self.authorized_client.get(f'/post/{self.post.id}/')
+        response = self.authorized_client.get(f'/posts/{self.post.id}/')
         self.assertEqual(response.status_code, HTTPStatus.OK.value)
 
     # Проверяем редиректы для неавторизованного пользователя
-    def test_post_edit_url_redirect_nonauth(self):
+    def test_post_edit_url_redirect_nonauthor(self):
         """Страница /post/edit/ перенаправляет анонимного пользователя."""
-        response = self.guest_client.get(f'/post/{self.post.id}/edit/')
+        response = self.guest_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
-        response = self.authorized_client_author.get(f'/post/{self.post.id}/edit/')
+        response = self.authorized_client_author.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.OK.value)
-        response = self.authorized_client.get(f'/post/{self.post.id}/edit/')
+        response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
 
     def test_post_create_url_redirect_anonymous(self):
