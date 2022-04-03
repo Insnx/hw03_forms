@@ -23,6 +23,11 @@ class TaskPagesTests(TestCase):
             text='Тестовая пост',
             group=cls.group
         )
+        cls.other_group = Group.objects.create(
+            title='Тестовый заголовок',
+            description='Тестовое описание',
+            slug='test-other_slug'
+        )
 
     def setUp(self):
         # Создаем авторизованный клиент
@@ -118,3 +123,42 @@ class TaskPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
+
+    def test_post_new_create(self):
+        """Проверяем, что при создании поста:
+        пост появляется на главной странице,
+        на странице выбранной группы,
+        в профайле пользователя"""
+        new_post = Post.objects.create(
+            author=self.user,
+            text=self.post.text,
+            group=self.group
+        )
+        exp_pages = [
+            reverse('posts:index'),
+            reverse(
+                'posts:group_list', kwargs={'slug': self.group.slug}),
+            reverse(
+                'posts:profile', kwargs={'username': self.user.username})
+        ]
+        for rev in exp_pages:
+            with self.subTest(rev=rev):
+                response = self.authorized_client.get(rev)
+                self.assertIn(
+                    new_post, response.context['page_obj']
+                )
+
+    def test_post_new_not_in_group(self):
+        """Проверяем, что созданный пост не попал в другую группу,
+        для которой не был предназначен."""
+        new_post = Post.objects.create(
+            author=self.user,
+            text=self.post.text,
+            group=self.group
+        )
+        response = self.authorized_client.get(
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.other_group.slug})
+        )
+        self.assertNotIn(new_post, response.context['page_obj'])
