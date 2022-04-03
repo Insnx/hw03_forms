@@ -67,7 +67,8 @@ class TaskURLTests(TestCase):
         """Страница /post/edit/ перенаправляет анонимного пользователя."""
         response = self.guest_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
-        response = self.authorized_client_author.get(f'/posts/{self.post.id}/edit/')
+        response = self.authorized_client_author.get(
+            f'/posts/{self.post.id}/edit/')
         self.assertTemplateUsed(response, 'posts/create_post.html')
         self.assertEqual(response.status_code, HTTPStatus.OK.value)
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')

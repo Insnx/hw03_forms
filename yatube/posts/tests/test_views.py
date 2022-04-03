@@ -31,7 +31,6 @@ class TaskPagesTests(TestCase):
 
     def setUp(self):
         # Создаем авторизованный клиент
-        #self.user = User.objects.create_user(username='StasBasov')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -40,19 +39,21 @@ class TaskPagesTests(TestCase):
         """URL-адрес использует соответствующий шаблон."""
         # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
         templates_pages_names = {
-            'posts/index.html': reverse('posts:index'),
-            'posts/group_list.html': (
-                reverse('posts:group_list', kwargs={'slug': 'test-slug'})
-            ),
-            'posts/profile.html': (
-                reverse('posts:profile', kwargs={'username': self.user.username})
-            ),
-            'posts/post_detail.html': (reverse('posts:post_detail', kwargs={'post_id': self.post.pk})),
-            'posts/create_post.html': (reverse('posts:post_edit', kwargs={'post_id': self.post.pk})),
-            'posts/create_post.html': reverse('posts:post_create')
+            reverse('about:author'): 'about/author.html',
+            reverse('about:tech'): 'about/tech.html',
+            reverse('posts:index'): 'posts/index.html',
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}):
+            'posts/group_list.html',
+            reverse('posts:profile', kwargs={'username': self.user.username}):
+            'posts/profile.html',
+            reverse('posts:post_detail', kwargs={'post_id': self.post.pk}):
+            'posts/post_detail.html',
+            reverse('posts:post_create'): 'posts/create_post.html',
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}):
+            'posts/create_post.html',
         }
-        # Проверяем, что при обращении к name вызывается соответствующий HTML-шаблон
-        for template, reverse_name in templates_pages_names.items():
+
+        for reverse_name, template in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
@@ -105,8 +106,6 @@ class TaskPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
-
-
 
     def test_post_edit_post(self):
         """Проверяем контекст страницы post_edit"""
